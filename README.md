@@ -1,8 +1,3 @@
-# Student API – Linux README (Simple)
-
-This is a **plain, short, Linux‑only** guide. Copy–paste steps. No fluff.
-
----
 
 ## 0) Install tools (Ubuntu/Debian)
 
