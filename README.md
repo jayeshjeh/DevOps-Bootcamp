@@ -46,8 +46,8 @@ verify_tools
 ## 1) Get the code
 
 ```bash
-git clone <YOUR_REPO_URL> student-api
-cd student-api
+git clone https://github.com/jayeshjeh/DevOps-Bootcamp.git
+cd DevOps-Bootcamp
 cp .env .env.local  # optional backup for your tweaks
 ```
 
