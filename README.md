@@ -137,7 +137,6 @@ curl -i -X POST http://localhost:5000/api/v2/students -H 'Content-Type: applicat
 
 ## 4) Notes
 
-* **Volumes**: `./migrations:/app/migrations` (bind‑mount so migration files are saved to your repo). `postgres_vol` persists DB data.
-* **Env**: `docker-compose.yml` sets `DATABASE_URL` for containers. Keep it consistent with `.env` if you change creds.
+* **Volumes**: `.:/app/` (bind‑mount so migration files are saved to your repo).
 * **Rebuild when needed**: after changing Dockerfile/deps, run `make docker-build` again.
 
