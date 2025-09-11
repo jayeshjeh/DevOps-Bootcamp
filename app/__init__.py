@@ -11,7 +11,6 @@ import os, logging, json, time, uuid, sys
 from .routes import bp
 
 
-
 def create_app(config_overrides = None):
     app = Flask(__name__)
     
@@ -24,9 +23,11 @@ def create_app(config_overrides = None):
             app.config.from_object(config_overrides)
         
         
-    
-    level_name = os.getenv("LOG_LEVEL", "INFO").upper()
-    level = getattr(logging, level_name, logging.INFO)
+    level = app.config.get("LOG_LEVEL", logging.INFO)
+    level_name = os.getenv("LOG_LEVEL")
+    if level_name:
+        level = getattr(logging, level_name.upper(), level)
+
                
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(level)

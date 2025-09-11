@@ -1,77 +1,55 @@
-VENV := .venv
-PY := $(VENV)/bin/python
-PIP := $(VENV)/bin/pip
-FLASK := $(VENV)/bin/flask
-PYTEST := $(VENV)/bin/pytest
 
-export PYTHONPATH := $(PWD)
-export FLASK_APP := wsgi:app 
-export FLASK_NEW ?= development
+REGISTRY ?= jayesh898
+NAME     ?= flask-api
+TAG      ?= v1.0.1
+IMAGE    ?= $(REGISTRY)/$(NAME):$(TAG)
 
-IMAGE := student_api:dev
-CONTAINER := student_api_dev
-MESSAGE ?= auto-migration
+MESSAGE  ?= "enter message"
 
-.PHONY: help venv install run test \
-        db-init db-migrate db-upgrade db-downgrade db-reset db-nuke db-head \
-        docker-build docker-run docker-logs docker-stop docker-clean
+.PHONY: help docker-build docker-start-db docker-migrate-generate docker-migrate docker-start-api docker-logs docker-stop docker-clean start-api
 
 help:
-	@echo "Common commands:"
-	@echo "  make run            - run the API locally"
-	@echo "  make test           - run pytest"
-	@echo "  make db-init        - create migrations/ folder (first time only)"
-	@echo "  make db-migrate     - generate a new migration from model changes"
-	@echo "  make db-upgrade     - apply migrations to DB (upgrade to head)"
-	@echo "  make db-downgrade   - rollback last migration (downgrade one step)"
-	@echo "  make db-reset       - drop everything (downgrade to base) then upgrade"
-	@echo "  make docker-build   - build Docker image ($(IMAGE))"
-	@echo "  make docker-run     - run container on :5000 (reads .env if present)"
-	@echo "  make docker-logs    - tail container logs"
-	@echo "  make docker-stop    - stop and remove container"
-	@echo "  make docker-clean   - remove container + image"
-
-venv:
-	python3 -m venv $(VENV)
-	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
-
-run: venv
-	$(FLASK) run -p 5000
-
-test: venv
-	$(PYTEST) -vv
-
-db-init: venv
-	$(FLASK) db init
-
-db-migrate: venv
-	$(FLASK) db migrate -m "$(MESSAGE)"
-
-db-upgrade: venv
-	$(FLASK) db upgrade
-
-db-downgrade: venv
-	$(FLASK) db downgrade
-
-
-db-reset: venv
-	$(FLASK) db downgrade base || true
-	$(FLASK) db upgrade
-
+	@echo "Available commands:"
+	@echo "  make docker-build            - Build the REST API image ($(IMAGE))"
+	@echo "  make docker-start-db         - Start Postgres and wait until healthy"
+	@echo "  make docker-migrate-generate - Autogenerate a migration with Alembic"
+	@echo "  make docker-upgrade          - Apply DB migrations (idempotent)"
+	@echo "  make docker-start-api        - Start the API container"
+	@echo "  make start-api               - DB -> wait -> migrate -> API"
+	@echo "  make docker-logs             - Tail logs"
+	@echo "  make docker-stop             - Stop and remove containers"
+	@echo "  make docker-clean            - Stop + remove volumes + images"
 
 docker-build:
-	docker build -t $(IMAGE) .
+	IMAGE=$(IMAGE) docker compose build api
 
-docker-run:
-	- docker rm -f $(CONTAINER) 2>/dev/null || true
-	docker run --name $(CONTAINER) --env-file .env -p 5000:5000 $(IMAGE)
+docker-start-db:
+	docker compose up -d postgres
+	@echo "Waiting for Postgres to become healthy..."
+	@until [ "$$(docker inspect --format='{{.State.Health.Status}}' postgres_db)" = "healthy" ]; do \
+		echo "Postgres not healthy yet, retrying..."; \
+		sleep 2; \
+	done
+	@echo "Postgres is healthy."
+
+docker-migrate-generate:
+	IMAGE=$(IMAGE) docker compose run --rm --no-deps api flask --app wsgi db migrate -m $(MESSAGE)
+
+docker-upgrade:
+
+	IMAGE=$(IMAGE) docker compose run --rm --no-deps api flask --app wsgi db upgrade
+
+docker-start-api:
+	IMAGE=$(IMAGE) docker compose up -d api
 
 docker-logs:
-	docker logs -f $(CONTAINER)
+	docker compose logs -f
 
 docker-stop:
-	- docker rm -f $(CONTAINER) 2>/dev/null || true
+	docker compose down
 
-docker-clean: docker-stop
-	- docker rmi $(IMAGE) 2>/dev/null || true
+docker-clean:
+	docker compose down -v --rmi all
+
+start-api: docker-start-db docker-migrate docker-start-api
+	@echo "API started at http://localhost:5000"

@@ -1,8 +1,51 @@
-#reset db
+curl -i http://localhost:5000/api/v2/health
 
-python -c "from app import create_app; from extensions import db; 
-app=create_app(); 
-app.app_context().push(); 
-db.drop_all(); 
-db.create_all(); 
-print('DB dropped & created');"
+curl -i http://localhost:5000/api/v2/db/health
+
+# List all students
+curl -i http://localhost:5000/api/v2/students
+
+# Create student user1
+curl -i -X POST http://localhost:5000/api/v2/students \
+  -H "Content-Type: application/json" \
+  -d '{"name": "user1", "age": 20, "grade": "A", "email": "user1@example.com"}'
+
+# Create student user2
+curl -i -X POST http://localhost:5000/api/v2/students \
+  -H "Content-Type: application/json" \
+  -d '{"name": "user2", "age": 22, "grade": "B", "email": "user2@example.com"}'
+
+# Create student with missing fields (validation test)
+curl -i -X POST http://localhost:5000/api/v2/students \
+  -H "Content-Type: application/json" \
+  -d '{"name": "user3"}'
+
+# Create student with duplicate email (conflict test)
+curl -i -X POST http://localhost:5000/api/v2/students \
+  -H "Content-Type: application/json" \
+  -d '{"name": "userDup", "age": 23, "grade": "C", "email": "user1@example.com"}'
+
+
+# Get student user1 (assuming id=1 after creation)
+curl -i http://localhost:5000/api/v2/students/1
+
+# Get non-existent student
+curl -i http://localhost:5000/api/v2/students/999
+
+
+# Update user1’s grade and email
+curl -i -X PUT http://localhost:5000/api/v2/students/1 \
+  -H "Content-Type: application/json" \
+  -d '{"grade": "A+", "email": "user1_new@example.com"}'
+
+# Update with invalid age
+curl -i -X PUT http://localhost:5000/api/v2/students/1 \
+  -H "Content-Type: application/json" \
+  -d '{"age": "twenty"}'
+
+
+# Delete user2 (assuming id=2)
+curl -i -X DELETE http://localhost:5000/api/v2/students/2
+
+# Delete non-existent student
+curl -i -X DELETE http://localhost:5000/api/v2/students/999

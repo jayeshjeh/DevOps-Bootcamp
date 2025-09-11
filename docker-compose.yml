@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: User1
+      POSTGRES_PASSWORD: User1password
+      POSTGRES_DB: postgres_db
+    volumes:
+      - postgres_vol:/var/lib/postgresql/data
+    networks:
+      - flask-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U User1 -d postgres_db -h 127.0.0.1 || exit 1"]
+      interval: 7s
+      timeout: 7s
+      retries: 5
+      start_period: 15s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: "${IMAGE:-jayesh898/flask-api:v1.0.1}"
+    container_name: flask_api
+    restart: always
+    environment:
+      FLASK_ENV: "production"
+      DATABASE_URL: postgresql+psycopg://User1:User1password@postgres:5432/postgres_db
+      FLASK_APP: wsgi
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    networks:
+      - flask-net
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_vol:
+
+networks:
+  flask-net:
+    name : flask-net
+

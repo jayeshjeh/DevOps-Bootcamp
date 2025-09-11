@@ -8,7 +8,8 @@ class Student(db.Model):
     age = db.Column(db.Integer, nullable = False)
     grade = db.Column(db.String(12), nullable = False)
     email = db.Column(db.String(200), nullable = False, unique = True)
-    
+
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -17,4 +18,5 @@ class Student(db.Model):
             "grade" : self.grade,
             "email" : self.email
         }
+        
         

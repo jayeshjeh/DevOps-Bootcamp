@@ -30,6 +30,7 @@ def db_health():
     except Exception as e:
         return jsonify({"db": "down", "detail" : str(e)}), 500
 
+
 @bp.get("/students")
 def list_students():
     items = Student.query.order_by(Student.id.asc()).all()
