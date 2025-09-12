@@ -5,12 +5,12 @@ on:
     push:
         branches: milestone_4
         paths:
-            - "/app/*"
+            - "app/**"
             - "Dockerfile"
             - "docker-compose.yml"
             - "wsgi.py"
             - "requirements.txt"
-            - "test/*"
+            - "test/**"
             - "extensions.py"
 
 jobs:

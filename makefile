@@ -21,10 +21,10 @@ help:
 dependency:
 	python3 -m pip install -r requirements.txt
 
-lint:
+lint: dependency
 	pylint -E app
 
-test:
+test: dependency
 	pytest -q
 
 docker-login:
