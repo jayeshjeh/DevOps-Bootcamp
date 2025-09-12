@@ -4,9 +4,7 @@ NAME     ?= flask-api
 TAG      ?= v2.0.1
 IMAGE    ?= $(DOCKERHUB_USER)/$(NAME):$(TAG)
 
-MESSAGE  ?= "enter message"
-
-.PHONY: help docker-build docker-start-db docker-migrate-generate docker-migrate docker-start-api docker-logs docker-stop docker-clean start-api
+.PHONY: dependency, lint, test, docker-login, docker-build, docker-push
 
 help:
 	@echo "Available commands:"
