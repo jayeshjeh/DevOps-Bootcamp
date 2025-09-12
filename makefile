@@ -25,7 +25,7 @@ lint: dependency
 	pylint -E app
 
 test: dependency
-	pytest -q
+	PYTHONPATH=. pytest -q
 
 docker-login:
 	@echo "$$TOKEN" | docker login -u $(DOCKERHUB_USER) --password-stdin
