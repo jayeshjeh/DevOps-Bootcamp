@@ -1,1 +1,49 @@
+name: CI
 
+on:
+    workflow_dispatch: {}
+    push:
+        branches: milestone_4
+        paths:
+            - "/app/*"
+            - "Dockerfile"
+            - "docker-compose.yml"
+            - "wsgi.py"
+            - "requirements.txt"
+            - "test/*"
+            - "extensions.py"
+
+jobs:
+    ci:
+      runs-on: self-hosted
+
+      env:
+        DOCKERHUB_USER: jayesh898
+        NAME: flask-api
+
+
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v5
+
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: "3.12"
+
+        - name: Run tests
+          run: make test
+        
+        - name: Lint
+          run: make lint
+            
+        - name: Docker Login
+          env:
+            TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          run: make docker-login
+
+        - name: Docker build
+          run: make docker-build
+
+        - name: Docker Image Push
+          run: make docker-push
