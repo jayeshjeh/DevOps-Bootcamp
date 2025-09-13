@@ -36,7 +36,6 @@ docker-migrate-generate:
 	IMAGE=$(IMAGE) docker compose run --rm --no-deps api flask --app wsgi db migrate -m $(MESSAGE)
 
 docker-upgrade:
-
 	IMAGE=$(IMAGE) docker compose run --rm --no-deps api flask --app wsgi db upgrade
 
 docker-start-api:
@@ -51,5 +50,5 @@ docker-stop:
 docker-clean:
 	docker compose down -v --rmi all
 
-start-api: docker-start-db docker-migrate docker-start-api
+start-api: docker-start-db docker-upgrade docker-start-api
 	@echo "API started at http://localhost:5000"
