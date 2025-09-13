@@ -53,7 +53,6 @@ verify_tools
 ```bash
 git clone https://github.com/jayeshjeh/DevOps-Bootcamp.git
 cd DevOps-Bootcamp
-cp .env .env.local  # optional backup for your tweaks
 ```
 
 > API base path: `/api/v2`
