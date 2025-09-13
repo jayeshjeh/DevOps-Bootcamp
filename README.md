@@ -72,7 +72,6 @@ cp .env .env.local  # optional backup for your tweaks
 * `docker-start-api`
 * `docker-logs`, `docker-stop`, `docker-clean`
 
-> Note: The `start-api` target currently points to `docker-migrate` (not defined). Use the steps below instead.
 
 ### Steps
 
