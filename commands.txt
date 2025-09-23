@@ -1,3 +1,27 @@
+docker run -d --rm --name pg \
+  -e POSTGRES_USER=User1 \
+  -e POSTGRES_PASSWORD=User1password \
+  -e POSTGRES_DB=postgres_db \
+  -p 5432:5432 postgres:15
+
+
+docker run --rm -it \
+  -v "$PWD":/app -w /app --network host \
+  -e FLASK_APP=wsgi.py \
+  -e DATABASE_URL='postgresql+psycopg://User1:User1password@localhost:5432/postgres_db' \
+  jayesh898/flask-api:v1.2.3 \
+  /bin/sh -lc '
+    if [ ! -d migrations ]; then flask db init; fi
+    flask db upgrade
+    flask db migrate -m "add dept column"
+    flask db upgrade
+  '
+
+
+
+kubectl -n student-api port-forward svc/flask-service 8080:80
+
+
 curl -i http://localhost:8080/api/v2/health
 
 curl -i http://localhost:8080/api/v2/db/health

@@ -1,0 +1,95 @@
+
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: student-api
+
+---
+
+apiVersion: v1
+kind: ConfigMap 
+metadata:
+  name: flask-config
+  namespace: student-api
+data: 
+  FLASK_ENV: "production"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_NAME: "postgres_db"
+
+---
+
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: app-secrets
+  namespace: student-api
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: vault-cluster
+  target:
+    name: app-secrets
+    creationPolicy: Owner
+  data:
+    - secretKey: DATABASE_URL
+      remoteRef:
+        key: app-secrets
+        property: DATABASE_URL
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-api
+  namespace: student-api
+  labels:
+    app: flask-api
+spec:
+  selector:
+    matchLabels:
+      app: flask-api
+  template:
+    metadata:
+      labels:
+        app: flask-api
+    spec:
+      nodeSelector:
+        type: application
+      initContainers:
+        - name: migrate-container
+          image: jayesh898/flask-api:v1.2.7
+          envFrom:
+           - configMapRef: { name: flask-config }
+           - secretRef: { name: app-secrets }
+          command: ["/bin/sh", "-c"]
+          args: ["FLASK_APP=wsgi.py flask db upgrade"]
+
+      containers:
+        - name: flask-api
+          image: jayesh898/flask-api:v1.2.7
+          envFrom:
+            - configMapRef:
+                name: flask-config
+            - secretRef:
+                name: app-secrets
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-service
+  namespace: student-api
+spec:
+  type: NodePort
+  selector:
+    app: flask-api
+  ports:
+    - port: 80
+      targetPort: 5000
+      nodePort: 30001
+
