@@ -1,151 +1,82 @@
 # README.md
 
-## 1. Prerequisites
+## Minikube 3-Node Cluster Setup with Labels
+---
 
-To get started, install the following on your host machine:
+### 1. Prerequisites
 
-* **Vagrant**: [Download & Install](https://developer.hashicorp.com/vagrant/downloads)
-* **VirtualBox**: [Download & Install](https://www.virtualbox.org/wiki/Downloads)
+* Linux with Docker installed (or VirtualBox/KVM2 as driver)
+* Minikube installed
+* kubectl installed 
 
-Ensure both are installed and available in your system PATH.
 
 ---
 
-## 2. Starting the Vagrant VM
-
-### Boot the VM
+### 2. Start Minikube with 3 nodes
 
 ```bash
-vagrant up --provider=virtualbox
+minikube start -p prod --driver=docker --nodes=4
 ```
 
-This will:
+This creates:
 
-* Create the VM from the `Vagrantfile`
-* Install dependencies via the `install.sh` provisioning script
-* Spin up Docker and run your services using `docker-compose`
+* `prod` (control-plane)
+* `prod-m02` (worker)
+* `prod-m03` (worker)
+* `prod-m04` (worker)
 
-### Re-provision after changes to shell script
-
-If you update the provisioning script (e.g., `install.sh`):
-
-```bash
-vagrant reload --provision-with shell
-```
-
-This reloads the VM and re-runs the shell provisioner.
-
-### SSH into the VM
-
-To log into the guest VM:
+Check nodes:
 
 ```bash
-vagrant ssh
-```
-
-Inside, you can:
-
-```bash
-cd /vagrant   
-```
-
-Run docker commands, for example:
-
-```bash
-docker ps -a
+kubectl get nodes -o wide
 ```
 
 ---
 
-## 3. Running and Scaling the API
+### 3. Add labels to nodes
 
-Your **Makefile** includes:
-
-```make
-make start-api
-```
-
-This command:
-
-* Starts Postgres
-* Applies migrations
-* Runs the API service with **2 replicas** (`api=2`)
-* Starts Nginx as a load balancer
-
-So you have 2 API containers running behind Nginx.
-
----
-
-## 4. Accessing Endpoints
-
-Once VM is up:
-
-* Health check endpoint:
-
-  ```
-  http://localhost:8080/api/v2/health
-  ```
-* Student endpoints (CRUD):
-
-  * `GET /api/v2/students`
-
-
-To check if all containers are running:
+Attach role-based labels:
 
 ```bash
-docker ps
+kubectl label node prod-m02 type=application
+kubectl label node prod-m03 type=database
+kubectl label node prod-m04 type=dependent_services
 ```
 
-You should see: `postgres_db`, `nginx`, and two replicas of `flask_api`.
+Verify:
+
+```bash
+kubectl get nodes --show-labels
+```
 
 ---
 
-## 5. Running the Postman Collection
+### 4. Use labels in workloads
 
-1. Open **Postman**.
-2. Import the provided JSON file
+Example Deployment pinned to `type=application` node:
 
-   * In Postman → File → Import → Choose JSON file.
-
-4. Run the collection to test all endpoints.
-
----
-
-## 6. Useful Vagrant Commands
-
-* Suspend the VM:
-
-  ```bash
-  vagrant suspend
-  ```
-* Halt (shutdown) the VM:
-
-  ```bash
-  vagrant halt
-  ```
-* Destroy the VM:
-
-  ```bash
-  vagrant destroy -f
-  ```
-* Check status:
-
-  ```bash
-  vagrant status
-  ```
+```yaml
+spec:
+  template:
+    spec:
+      nodeSelector:
+        type: application
+```
 
 ---
 
-## 7. Troubleshooting
+### 5. Confirm placement
 
-* If endpoints don’t respond, check Nginx logs:
+Check where pods are scheduled:
 
-  ```bash
-  docker logs nginx
-  ```
-* If DB is unhealthy, check Postgres logs:
+```bash
+kubectl get pods -o wide
+```
 
-  ```bash
-  docker logs postgres_db
-  ```
+Check node labels:
+
+```bash
+kubectl describe node prod-m02 | grep -i labels -A5
+```
+
 
