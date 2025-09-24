@@ -199,9 +199,9 @@ When you change `models.py`:
    ```bash
    export FLASK_APP=wsgi.py
    export DATABASE_URL='postgresql+psycopg://User1:User1password@localhost:5432/postgres_db'
-   flask db upgrade              # bring local DB to current head
-   flask db migrate -m "<your change>"
-   flask db upgrade              # optional local apply to test
+   flask db upgrade     
+   flask db migrate -m "message"
+   flask db upgrade     
    ```
 3. **Commit** the new `migrations/` files.
 4. **Build & push** a new app image that includes those files.
@@ -230,7 +230,7 @@ kubectl -n student-api describe externalsecret app-secrets db-secrets
 kubectl -n student-api get secret app-secrets db-secrets
 ```
 
-**Database (psql)**
+**Database**
 
 ```bash
 kubectl -n student-api exec -it sts/postgres -c postgres -- \
