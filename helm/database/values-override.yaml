@@ -1,0 +1,30 @@
+image:
+  repository: postgres
+  tag: "16"
+  pullPolicy: IfNotPresent
+
+nodeSelector:
+  type: database
+
+service:
+  name: postgres
+  port: 5432
+
+persistence:
+  enabled: true
+  size: 1Gi
+  accessModes: ["ReadWriteOnce"]
+
+config:
+  dbName: "postgres_db"
+
+secretName: "db-secrets"
+
+externalSecret:
+  enabled: true
+  storeRef:
+    kind: ClusterSecretStore
+    name: vault-cluster
+  vaultKey: "app-secrets"
+  userKey: "POSTGRES_USER"
+  passwordKey: "POSTGRES_PASSWORD"

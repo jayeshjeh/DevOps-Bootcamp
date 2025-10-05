@@ -1,0 +1,4 @@
+token: "dev-only-token"
+vaultAddress: "http://vault.vault.svc:8200"
+path: "secret"
+version: "v2"

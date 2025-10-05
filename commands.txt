@@ -17,6 +17,16 @@ docker run --rm -it \
     flask db upgrade
   '
 
+export VAULT_ADDR=http://127.0.0.1:8200
+export VAULT_TOKEN=dev-only-token
+vault secrets enable -path=secret kv-v2 || true
+vault kv put secret/app-secrets \
+  POSTGRES_USER=User1 \
+  POSTGRES_PASSWORD=User1password \
+  DATABASE_URL="postgresql+psycopg://User1:User1password@postgres.student-api.svc.cluster.local:5432/postgres_db"
+vault kv get secret/app-secrets
+
+
 
 
 kubectl -n student-api port-forward svc/flask-service 8080:80

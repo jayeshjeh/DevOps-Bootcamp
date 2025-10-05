@@ -1,0 +1,22 @@
+global:
+  tlsDisable: true
+
+injector:
+  enabled: false
+
+csi:
+  enabled: false
+
+server:
+  dev:
+    enabled: true
+    devRootToken: "root"
+  ui:
+    enabled: true
+    serviceType: ClusterIP
+    
+  nodeSelector:
+    node-type: dependent_services
+
+ui:
+  enabled: true

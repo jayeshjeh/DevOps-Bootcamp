@@ -1,0 +1,11 @@
+global:
+  tlsDisable: true
+server:
+  dev:
+    enabled: true
+    devRootToken: "dev-only-token"
+  nodeSelector: { type: dependent_services }
+  service:
+    enabled: true
+    type: ClusterIP
+ui: { enabled: true }
