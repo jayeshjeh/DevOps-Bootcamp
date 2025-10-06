@@ -5,7 +5,7 @@ on:
     branches: milestone_9
 
 jobs:
-  build&push:
+  build_and_push:
       name: Build and Push Image
       runs-on: ubuntu-latest
       env:
@@ -37,7 +37,7 @@ jobs:
 
   helm_image:
       name: Helm Image Tag
-      needs: build&push
+      needs: build_and_push
       runs-on: self-hosted
       permissions:
         contents: write
