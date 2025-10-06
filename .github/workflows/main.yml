@@ -38,7 +38,7 @@ jobs:
   helm_image:
       name: Helm Image Tag
       needs: build&push
-      runs_on: self-hosted
+      runs-on: self-hosted
       permissions:
         contents: write
       steps:
