@@ -53,8 +53,8 @@ jobs:
 
         - name: Install yq
           run: |
-            curl -sL https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -o /usr/local/bin/yq
-            chmod +x /usr/local/bin/yq
+            sudo curl -sL https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -o /usr/local/bin/yq
+            sudo chmod +x /usr/local/bin/yq
             yq --version
 
         - name: update values.yml
