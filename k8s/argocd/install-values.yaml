@@ -1,0 +1,32 @@
+controller:
+  nodeSelector:
+    node-type: dependent_services
+
+repoServer:
+  nodeSelector:
+    node-type: dependent_services
+
+applicationSet:
+  nodeSelector:
+    node-type: dependent_services
+
+redis:
+  nodeSelector:
+    node-type: dependent_services
+
+dex:
+  nodeSelector:
+    node-type: dependent_services
+
+server:
+  nodeSelector:
+    node-type: dependent_services
+  service:
+    type: NodePort
+    nodePortHttp: 30080
+    nodePortHttps: 30443
+  insecure: false
+
+configs:
+  params:
+    server.insecure: "true"
