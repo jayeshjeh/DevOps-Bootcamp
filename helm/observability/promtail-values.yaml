@@ -11,21 +11,22 @@ config:
 
   scrape_configs:
     - job_name: kubernetes-pods-student-api
-      pipeline_stages:
-        - cri: {}
       kubernetes_sd_configs:
         - role: pod
 
+      # keep only your app's logs (you already had these two)
       relabel_configs:
         - source_labels: [__meta_kubernetes_namespace]
           action: keep
           regex: student-api
-
-
         - source_labels: [__meta_kubernetes_pod_label_app]
           action: keep
           regex: flask-api
+        - source_labels: [__meta_kubernetes_pod_phase]
+          action: keep
+          regex: Running
 
+        # useful labels (namespaced, pod, node, container)
         - source_labels: [__meta_kubernetes_namespace]
           target_label: namespace
         - source_labels: [__meta_kubernetes_pod_name]
@@ -35,9 +36,42 @@ config:
         - source_labels: [__meta_kubernetes_pod_container_name]
           target_label: container
 
+
+
+        # read container log files correctly (include $2 = container)
         - action: replace
           source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
           separator: /
           replacement: /var/log/pods/*$1/$2/*.log
           target_label: __path__
 
+      pipeline_stages:
+        - cri: {}
+
+        # 1) parse the app JSON into fields
+        - json:
+            expressions:
+              level: level
+              method: method
+              path: path
+              status: status
+              duration_ms: duration_ms
+              request_id: request_id
+              t: time
+
+        # 2) set the log entry timestamp from your app's "time" (epoch ms)
+        - timestamp:
+            source: t
+            format: UnixMs
+
+        # 3) (optional) normalize numeric IDs in paths to reduce label cardinality
+        - replace:
+            expression: '/[0-9]+'
+            replace: '/:id'
+            source: path
+
+        # 4) expose a small, safe set of labels (everything else stays in the body)
+        - labels:
+            method:
+            path:
+            status:

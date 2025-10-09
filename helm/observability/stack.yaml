@@ -10,7 +10,7 @@ grafana:
     - name: Loki
       type: loki
       access: proxy
-      url: http://loki-gateway.observability.svc.cluster.local
+      url: http://loki.observability.svc.cluster.local:3100
       isDefault: false
       jsonData:
         maxLines: 1000
