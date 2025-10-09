@@ -1,22 +1,22 @@
-global:
-  tlsDisable: true
-
-injector:
-  enabled: false
-
-csi:
-  enabled: false
-
 server:
-  dev:
+  ha:
     enabled: true
-    devRootToken: "root"
-  ui:
+    raft:
+      enabled: true
+      # IMPORTANT: set HA replicas here (the chart ignores server.replicas for HA)
+      # start with 1 to simplify storage & scheduling, scale later
+      # (this is the field the chart uses for the StatefulSet size in HA mode)
+      setNodeId: true        # optional but recommended for stable raft IDs
+    replicas: 1              # <<--- use this under .server.ha
+  # remove/ignore .server.replicas if you had it
+
+  dataStorage:
     enabled: true
-    serviceType: ClusterIP
-    
+    size: 5Gi
+    storageClass: csi-hostpath-sc
+
   nodeSelector:
     node-type: dependent_services
 
-ui:
-  enabled: true
+  injector:
+    enabled: false

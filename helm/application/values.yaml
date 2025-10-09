@@ -11,7 +11,9 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "a9ac189"
-env: FLASK_ENV:production FLASK_APP:wsgi
+env: 
+  FLASK_ENV:production 
+  FLASK_APP:wsgi
 # This is for setting Kubernetes Annotations to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {}

@@ -1,36 +1,30 @@
-# Force service DNS to 'postgres'
-global:
-  postgresql:
-    fullnameOverride: postgres
-nameOverride: postgres
+
 fullnameOverride: postgres
 
 architecture: standalone
-readReplicas:
-  enabled: false
-  extendedConfiguration: ""
 
-# # Use a simple, known-good image tag
 # image:
 #   registry: docker.io
 #   repository: bitnami/postgresql
 #   tag: "16"
 #   pullPolicy: IfNotPresent
 
-# # Some chart versions also read primary.image.*. Set both to be safe.
-# primary:
-#   image:
-#     registry: docker.io
-#     repository: bitnami/postgresql
-#     tag: "16"
-#     pullPolicy: IfNotPresent
+
+primary:
   nodeSelector:
-    type: database
+    node-type: database
   persistence:
     enabled: true
     size: 1Gi
+    storageclass: csi-hostpath-sc
+
 
 auth:
-  existingSecret: db-secrets     # must contain keys: postgres-password and password
+  existingSecret: db-secrets
   username: "User1"
   database: "postgres_db"
+
+
+service:
+  ports:
+    postgresql: 5432
