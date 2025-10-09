@@ -192,8 +192,7 @@ nodeSelector:
 **Install/upgrade app:**
 
 ```bash
-helm upgrade --install flask-api ./helm/student-api \
-  -n student-api \
+helm upgrade --install flask-api helm/application/ -n student-api
 
 
 kubectl -n student-api get deploy,svc,pod
