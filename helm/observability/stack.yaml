@@ -1,0 +1,38 @@
+# Pin Grafana & Prometheus pods to the "dependent_services" node
+grafana:                                
+  enabled: true                    
+  adminPassword: observability
+  nodeSelector:                       
+    node-type: dependent_services
+  service:
+    type: ClusterIP    
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki-gateway.observability.svc.cluster.local
+      isDefault: false
+      jsonData:
+        maxLines: 1000
+
+prometheus:
+  prometheusSpec:
+    nodeSelector:                       
+      node-type: dependent_services
+
+    serviceMonitorSelector: {} 
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelector: {}  
+    podMonitorSelectorNilUsesHelmValues: false
+    probeSelector: {}      
+    probeSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {}  
+    podMonitorNamespaceSelector: {}
+    probeNamespaceSelector: {}
+
+
+kube-state-metrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true

@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: probe-student-api
+  namespace: observability
+spec:
+  jobName: student-api-uptime
+  module: http_2xx
+  prober:
+    url: blackbox-prometheus-blackbox-exporter.observability.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - http://flask-api.student-api.svc.cluster.local:5000/api/v2/health
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: probe-argocd
+  namespace: observability
+spec:
+  jobName: argocd-uptime
+  module: http_2xx
+  prober:
+    url: blackbox-prometheus-blackbox-exporter.observability.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - https://argocd-server.argocd.svc.cluster.local/
+        

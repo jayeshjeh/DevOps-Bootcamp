@@ -1,0 +1,10 @@
+serviceMonitor:
+  enabled: true        
+
+extraEnvs:
+  - name: DATA_SOURCE_NAME 
+    value: postgresql://User1:User1password@postgres.student-api.svc.cluster.local:5432/postgres_db?sslmode=disable
+
+nodeSelector:
+  node-type: dependent_services
+
