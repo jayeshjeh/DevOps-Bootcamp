@@ -1,22 +1,5 @@
-# Vault + External Secrets Operator (ESO) + Postgres (Dev) + App via Helm + ArgoCD via Helm
+README.md
 
-A minimal, **sequence-first** guide to get Vault (dev) working with ESO, sync credentials for Postgres, deploy your **Flask API via Helm**, and install **ArgoCD via Helm**. Kept to only what’s required.
-
----
-
-## 0) Prereqs
-
-* `kubectl` and `helm` configured
-* Namespaces: `vault`, `external-secrets`, `student-api`, `argocd`
-
-```bash
-kubectl create ns vault --dry-run=client -o yaml | kubectl apply -f -
-kubectl create ns external-secrets --dry-run=client -o yaml | kubectl apply -f -
-kubectl create ns student-api --dry-run=client -o yaml | kubectl apply -f -
-kubectl create ns argocd --dry-run=client -o yaml | kubectl apply -f -
-```
-
----
 
 ## 1) Install Vault (DEV MODE) — **one command**
 
@@ -138,7 +121,7 @@ spec:
 ```
 
 ```bash
-kubectl apply -f externalsecret-db.yaml
+kubectl apply -f helm/database/db-secrets.yaml
 kubectl -n student-api get externalsecret db-secrets -o wide
 kubectl -n student-api get secret db-secrets -o yaml
 ```
@@ -209,10 +192,9 @@ nodeSelector:
 **Install/upgrade app:**
 
 ```bash
-helm upgrade --install student-api ./helm/student-api \
+helm upgrade --install flask-api ./helm/student-api \
   -n student-api \
-  --set image.repository=jayesh898/flask-api \
-  --set image.tag=v1.0.1
+
 
 kubectl -n student-api get deploy,svc,pod
 ```
@@ -227,39 +209,13 @@ kubectl -n student-api get deploy,svc,pod
 
 ---
 
-## 9) **ArgoCD via Helm** (optional, for GitOps)
-
-Install ArgoCD using the official Argo Helm repo:
-
-```bash
-helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
-
-helm upgrade --install argocd argo/argo-cd \
-  -n argocd --create-namespace \
-  --set controller.nodeSelector.node-type=dependent_services \
-  --set server.nodeSelector.node-type=dependent_services \
-  --set repoServer.nodeSelector.node-type=dependent_services \
-  --set redis.nodeSelector.node-type=dependent_services
-```
 
 # Argo CD & Flask API Deployment (via Helm)
 
 This guide walks through a complete setup of **Argo CD** using Helm, followed by deploying your **Flask API Helm chart** automatically using an Argo CD `Application` manifest.
 
----
 
-## 1. Prerequisites
-
-Ensure you have:
-
-* A running Kubernetes cluster (e.g., multi-node Minikube)
-* `kubectl` and `helm` installed
-* Internet access for pulling charts and images
-
----
-
-## 2. Install Argo CD using Helm
+## 1. Install Argo CD using Helm
 
 ### Step 1: Add the Argo Helm repository
 
